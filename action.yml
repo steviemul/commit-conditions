@@ -1,0 +1,32 @@
+name: Commits Conditions
+description: Examines the commit in a triggered action and outputs a result based on examined conditions
+runs:
+  using: node16
+  main: dist/index.mjs
+inputs:
+  token:
+    description: >
+      GitHub token for GitHub API requests.
+      Users shouldn't need to set this themselves.
+    required: true
+    default: ${{ github.token }}
+  success-commit-message:
+    description: >
+      Action returns true if commit message contains this message.
+    required: false
+  fail-commit-message:
+    description: >
+      Action returns false if commit message contains this message.
+    required: false
+  excludes:
+    description: >
+      Comma separated list of file paths. Accepts glob patterns.
+      Action will return false if commit contains only these changed files. 
+  includes:
+    description: >
+      Aomma separated list of file paths. Accepts glob patterns.
+      Action will return true if commit contains any of these changed files.
+outputs:
+  result:
+    description: >
+      Result of checked conditions
