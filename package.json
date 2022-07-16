@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint src/*.mjs",
-    "build": "ncc build src/index.mjs -o dist",
+    "build": "ncc build src/index.mjs -o dist --license licenses.txt",
     "test": "jest",
     "all": "npm run lint && npm run prepare && npm run test"
   },
