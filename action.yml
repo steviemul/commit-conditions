@@ -1,5 +1,8 @@
-name: Commits Conditions
+name: Commit Conditions
 description: Examines the commit in a triggered action and outputs a result based on examined conditions
+branding:
+  icon: git-commit
+  color: blue
 runs:
   using: node16
   main: dist/index.mjs
@@ -29,4 +32,4 @@ inputs:
 outputs:
   result:
     description: >
-      Result of checked conditions
+      Result of checked conditions ('true' or 'false')
