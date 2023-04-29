@@ -11126,12 +11126,15 @@ async function run() {
     const includes = inputToArray('includes');
     const excludes = inputToArray('excludes');
 
-    const approve = core.getInput('approve');
-    const approveMessage = core.getInput('approveMessage');
-
     core.debug(`Includes ${includes.length}`);
     core.debug(`Excludes ${excludes.length}`);
 
+    const approve = core.getInput('approve');
+    const approveMessage = core.getInput('approveMessage');
+
+    core.debug(`Approve ${approve}`);
+    core.debug(`Approve message ${approveMessage}`);
+    
     core.debug(JSON.stringify(github.context, null, 2));
 
     const {message, files} = await getChangeInformation(github.context);
