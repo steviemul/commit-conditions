@@ -21,6 +21,8 @@ See [action.yml](action.yml)
 | fail-commit-message | action outputs false if commit message contains this string |
 | excludes | Comma separated list of file paths to exclude from check. Accepts glob patterns.
 | includes | Comma separated list of file paths to include in check. Accepts glob patterns.
+| approve  | If the event is a pull request, setting this to true will auto approve the PR if the condition is true
+| approveMessage  | Message to add to the approval if approve setting is set to true.
 
 ## Outputs
 

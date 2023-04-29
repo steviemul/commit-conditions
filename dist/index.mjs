@@ -10989,6 +10989,8 @@ const inputToArray = (key) => {
 
   const value = core.getInput(key);
 
+  core.debug(`Input values ${value}`);
+
   return (value !== null && value !== '') ? value.split(',') : [];
 };
 
@@ -11045,7 +11047,7 @@ async function getChangeInformation(context) {
         context.payload.pull_request?.head?.sha
       );
 
-      details.message = context.payload.pull_request?.head_commit?.message;
+      details.message = context.payload.pull_request?.title;
       break;
     }
     case PUSH_EVENT: {
@@ -11067,15 +11069,65 @@ async function getChangeInformation(context) {
   return details;
 }
 
+async function approvePr(context, comment) {
+
+  const pr = context.payload.pull_request?.number;
+
+  if (!pr) {
+    core.warning('No pr number found, exiting');
+    return;
+  }
+
+  const client = (0,github.getOctokit)(core.getInput('token',
+    {required: true}
+  ));
+
+  const { owner, repo } = context.repo;
+
+  const reviews = await client.rest.pulls.listReviews({ 
+    owner,
+    repo, 
+    pull_number: pr 
+  });
+
+  core.debug('REVIEWS');
+  core.debug(JSON.stringify(reviews, null, 2));
+
+  const approvedReviews = reviews.data.filter(r => r.state === 'APPROVED');
+
+  if (approvedReviews.length > 0) {
+    core.info(`PR ${pr} already approved, nothing more to do`);
+    return;
+  }
+
+  await client.rest.pulls.createReview({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: pr,
+    body: comment,
+    event: "APPROVE",
+  });
+
+  core.info(`PR ${pr} auto approved`);
+}
+
 async function run() {
 
   try {
-    
+    core.debug('RUNNING');
+
     const successCommitMessage = core.getInput('success-commit-message');
+
+    core.debug(`successCommitMessage ${successCommitMessage}`);
+
     const failCommitMessage = core.getInput('fail-commit-message');
+
+    core.debug(`failCommitMessage ${failCommitMessage}`);
 
     const includes = inputToArray('includes');
     const excludes = inputToArray('excludes');
+
+    const approve = core.getInput('approve');
 
     core.debug(`Includes ${includes.length}`);
     core.debug(`Excludes ${excludes.length}`);
@@ -11083,6 +11135,8 @@ async function run() {
     core.debug(JSON.stringify(github.context, null, 2));
 
     const {message, files} = await getChangeInformation(github.context);
+
+    console.debug(`Message ${message}`);
 
     if (successCommitMessage && message.includes(successCommitMessage)) {
       core.info(`Returning ${SUCCESS} based on commit message containing ${successCommitMessage}`);
@@ -11114,8 +11168,15 @@ async function run() {
     core.info(`Returning result : ${result}`);
 
     core.setOutput(OUTPUT_PROPERTY, result);
+
+    if (result === SUCCESS && github.context.eventName === PULL_REQUEST_EVENT) {
+      if (approve) {
+        await approvePr(github.context, 'Auto approved based on commit conditions');
+      }
+    }
   }
   catch (error) {
+    core.error(error);
     core.setFailed(error.message);
   }
 }
