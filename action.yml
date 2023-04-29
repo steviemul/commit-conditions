@@ -25,10 +25,21 @@ inputs:
     description: >
       Comma separated list of file paths. Accepts glob patterns.
       Action will return false if commit contains only these changed files. 
+    required: false
   includes:
     description: >
       Aomma separated list of file paths. Accepts glob patterns.
       Action will return true if commit contains any of these changed files.
+    required: false
+  approve:
+    description: >
+      if set to true, PR will be auto approved based on conditions
+    required: false
+    default: false
+  approveMessage:
+    description: >
+      Comment to set if auto approving PR.
+    required: false
 outputs:
   result:
     description: >
